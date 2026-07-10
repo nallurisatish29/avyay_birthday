@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Barlow:ital,wght@0,400;0,500;0,600;1,500&family=Chivo+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --red:#E10600;          /* F1 red red */
+    --red:#E10600;          /* F1 red */
     --red-dark:#B00500;
     --asphalt:#15151E;      /* F1 track dark */
     --carbon:#1F1F2B;
@@ -426,7 +426,7 @@
       <p class="section-label">Race details</p>
       <div class="details">
         <div class="detail"><div class="k">Date</div><div class="v">Friday, July 17, 2026</div></div>
-        <div class="detail"><div class="k">Lights out</div><div class="v">TBD — add time</div></div>
+        <div class="detail"><div class="k">Party begins</div><div class="v">6:30 PM</div></div>
         <div class="detail wide">
           <div class="k">Circuit</div>
           <div class="v">Waukee Community Center<br>675 Walnut St, Waukee, IA 50263</div>
@@ -472,7 +472,7 @@
 
 <script>
   // ⚠️ Paste your Google Apps Script Web App URL here:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_LKVmkO9HaFaNLXtZsYJNG3VIKSu7dtUJ8a3oBJHbEYjO6WEBWb_nQXaXXTDG4D7dVA/exec";
+  const SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -627,11 +627,13 @@
     car.style.fontSize = size + 'px';
     car.style.top = top + 'vh';
     if (opts.glow) car.style.filter = 'drop-shadow(0 0 14px rgba(225,6,0,.8))';
-    // flip only the emoji (not the container) so the label never mirrors
+    // flip only the emoji (not the container) so the label never mirrors;
+    // hue-rotate recolors the red emoji car (120 = green, 200 = blue, etc.)
     const flip = dir === 1 ? 'transform:scaleX(-1);' : '';
+    const tint = opts.hue ? `filter:hue-rotate(${opts.hue}deg) saturate(1.15);` : '';
     car.innerHTML =
       (opts.label ? `<span class="car-tag">${opts.label}</span>` : '') +
-      `<span style="display:inline-block;${flip}">🏎️</span>`;
+      `<span style="display:inline-block;${flip}${tint}">🏎️</span>`;
     document.body.appendChild(car);
 
     const startX = dir === 1 ? -size * 3 : window.innerWidth + size * 3;
@@ -677,9 +679,9 @@
     raceCar({ size: lead, top: 46, dur: 2800, dir: 1,
               sound: !!withSound, label: 'AVYAY · 01', glow: true });
     // chasers — staggered, a touch slower, fanned out behind
-    setTimeout(() => raceCar({ size: lead * .68, top: 42, dur: 3100, dir: 1 }), 230);
-    setTimeout(() => raceCar({ size: lead * .62, top: 52, dur: 3300, dir: 1 }), 420);
-    setTimeout(() => raceCar({ size: lead * .55, top: 47, dur: 3500, dir: 1 }), 620);
+    setTimeout(() => raceCar({ size: lead * .68, top: 42, dur: 3100, dir: 1, hue: 200 }), 230);   // blue
+    setTimeout(() => raceCar({ size: lead * .62, top: 52, dur: 3300, dir: 1, hue: 120 }), 420);   // green
+    setTimeout(() => raceCar({ size: lead * .55, top: 47, dur: 3500, dir: 1, hue: 45 }), 620);    // orange-gold
   }
 
   // Big victory chase after RSVP
@@ -688,12 +690,14 @@
   // Ambient racing: solo cars zip by, and every so often the whole
   // chase comes through (silent)
   if (!reduced){
-    setTimeout(() => raceCar({ size: 40 }), 5000);
+    const liveries = [0, 45, 120, 200, 280];          // red, gold, green, blue, purple
+    const randomHue = () => liveries[Math.floor(Math.random() * liveries.length)];
+    setTimeout(() => raceCar({ size: 40, hue: randomHue() }), 5000);
     let lap = 0;
     setInterval(() => {
       lap++;
       if (lap % 3 === 0) chaseScene(false);          // every 3rd pass: the chase
-      else raceCar({ size: 34 + Math.random() * 26 }); // otherwise a solo car
+      else raceCar({ size: 34 + Math.random() * 26, hue: randomHue() }); // solo car, random livery
     }, 9000);
   }
 
